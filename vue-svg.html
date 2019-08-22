@@ -9,6 +9,14 @@
       .resizable {
         cursor: ew-resize;
       }
+      svg {
+        width: 640px;
+        height: 480px;
+        background-color: silver;
+      }
+      line {
+        cursor: move;
+      }
     </style>
   </head>
   <body>
@@ -78,138 +86,25 @@
         {{ isMove1 }}, {{ xLeft }}, {{ isMove2 }}, {{ xRight }}, {{ xClient }}
       </div>
     </div>
+    <div id="app3" style="height:500px">
+      <svg
+        @mousemove="touchmove($event)"
+        @mouseup="touchend($event)"
+        @mouseleave="touchend($event)"
+      >
+        <line
+          v-for="line in list_line"
+          @mousedown="touchstart($event)"
+          :x1="line.x1"
+          :y1="line.y1"
+          :x2="line.x2"
+          :y2="line.y2"
+          :stroke-width="line.width"
+          :stroke="line.stroke"
+        />
+      </svg>
+    </div>
     <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
-    <script>
-      var app1 = new Vue({
-        el: "#app1",
-        data: function() {
-          return {
-            xLeft: 20,
-            xRight: 120,
-            // y: 25,
-            // width: 200,
-            isMove1: false,
-            isMove2: false,
-            xClient: 0
-          };
-        },
-        computed: {
-          rectWidth: function() {
-            return this.xLeft < this.xRight
-              ? this.xRight - this.xLeft
-              : this.xLeft - this.xRight;
-          },
-          rectX() {
-            return this.xLeft < this.xRight ? this.xLeft : this.xRight;
-          }
-        },
-        methods: {
-          md(ev, val) {
-            if (val === 1) {
-              this.isMove1 = true;
-            } else if (val === 2) {
-              this.isMove2 = true;
-            }
-            document.addEventListener("mousemove", this.mm);
-            document.addEventListener("mouseup", this.mu);
-            document.addEventListener("touchmove", this.tm);
-            document.addEventListener("touchend", this.mu);
-          },
-          mu() {
-            this.isMove1 = false;
-            this.isMove2 = false;
-            document.removeEventListener("mousemove", this.mm);
-            document.removeEventListener("mouseup", this.mu);
-            document.removeEventListener("touchmove", this.tm);
-            document.removeEventListener("touchend", this.mu);
-          },
-          mm(ev) {
-            this.xClient = ev.clientX;
-            if (this.isMove1) {
-              // todo: fix magic number
-              this.xLeft = ev.clientX - 10;
-            } else if (this.isMove2) {
-              this.xRight = ev.clientX - 10;
-            }
-          },
-          tm(ev) {
-            if (this.isMove1) {
-              // todo: fix magic number
-              this.xLeft = ev.touches[0].clientX - 10;
-            } else if (this.isMove2) {
-              this.xRight = ev.touches[0].clientX - 10;
-            }
-          }
-        }
-      });
-      var app2 = new Vue({
-        el: "#app2",
-        data: function() {
-          return {
-            xLeft: 20,
-            xRight: 120,
-            // y: 25,
-            // width: 200,
-            isMove1: false,
-            isMove2: false,
-            xClient: 0
-          };
-        },
-        computed: {
-          rectWidth: function() {
-            return this.xLeft < this.xRight
-              ? this.xRight - this.xLeft
-              : this.xLeft - this.xRight;
-          },
-          rectX() {
-            return this.xLeft < this.xRight ? this.xLeft : this.xRight;
-          }
-        },
-        methods: {
-          md(ev, val) {
-            if (val === 1) {
-              this.isMove1 = true;
-            } else if (val === 2) {
-              this.isMove2 = true;
-            }
-            document.addEventListener("mousemove", this.mm);
-            document.addEventListener("mouseup", this.mu);
-            document.addEventListener("touchmove", this.tm);
-            document.addEventListener("touchend", this.mu);
-          },
-          mu() {
-            this.isMove1 = false;
-            this.isMove2 = false;
-            document.removeEventListener("mousemove", this.mm);
-            document.removeEventListener("mouseup", this.mu);
-            document.removeEventListener("touchmove", this.tm);
-            document.removeEventListener("touchend", this.mu);
-          },
-          mm(ev) {
-            this.xClient = ev.clientX;
-            if (this.isMove1) {
-              // todo: fix magic number
-              if (ev.clientX > this.xLeft) {
-                // this.xLeft = ev.clientX - 10;
-                this.xLeft = ev.clientX + 30;
-              }
-            } else if (this.isMove2) {
-              if (ev.clientX > this.xRight) {
-                // this.xRight = ev.clientX - 10;
-                this.xRight = ev.clientX + 30;
-              }
-            }
-          },
-          tm(ev) {
-            if (this.isMove1) {
-              // todo: fix magic number
-              this.xLeft = ev.touches[0].clientX - 10;
-            } else if (this.isMove2) {
-              this.xRight = ev.touches[0].clientX - 10;
-            }
-          }
-        }
-      });
-    </script>
+    <script src="vue-svg.js"></script>
   </body>
 </html>
