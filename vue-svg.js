@@ -1,14 +1,20 @@
 var app1 = new Vue({
-  el: "#app1",
+  el: "#app",
   data: function() {
     return {
-      xLeft: 20,
-      xRight: 120,
-      // y: 25,
-      // width: 200,
-      isMove1: false,
-      isMove2: false,
-      xClient: 0
+      // 共通
+      dayWidth: 50,
+      xLeft: 100,
+      xRight: 200,
+      // drag用
+      isDrag: false,
+      xFirstLeft: 0,
+      xFirstRight: 0,
+      xPrev: 0,
+      // resize用
+      isResize1: false,
+      isResize2: false,
+      xFirst: 0
     };
   },
   computed: {
@@ -22,173 +28,126 @@ var app1 = new Vue({
     }
   },
   methods: {
-    md(ev, val) {
-      if (val === 1) {
-        this.isMove1 = true;
-      } else if (val === 2) {
-        this.isMove2 = true;
+    dmd(ev) {
+      this.isDrag = true;
+      // MouseDown時のX座標をセット（MouseUp時の微調整用）
+      this.xFirstLeft = this.xLeft;
+      this.xFirstRight = this.xRight;
+      console.log("md-xFirstLeft:%d", this.xFirstLeft);
+      // MouseDown時のX座標をセット（MouseMove時の差分計算用）
+      this.xPrev = ev.clientX;
+      console.log("md-xPrev:%d", this.xPrev);
+      document.addEventListener("mousemove", this.dmm);
+      document.addEventListener("touchmove", this.dtm);
+      document.addEventListener("mouseup", this.dmu);
+      document.addEventListener("touchend", this.dmu);
+    },
+    dmm(ev) {
+      // 押下中だったら
+      if (this.isDrag) {
+        console.log("mm-clientX:%d", ev.clientX);
+        // 前回MouseDown時との差分を算出
+        var diff = ev.clientX - this.xPrev;
+        console.log("mm-diff:%d", diff);
+        // 左右のLineに差分を適用
+        this.xLeft += diff;
+        this.xRight += diff;
+        // 前回MouseMove時のX座標の更新
+        this.xPrev = ev.clientX;
+        console.log("mm-xPrev:%d", this.xPrev);
       }
-      document.addEventListener("mousemove", this.mm);
-      document.addEventListener("mouseup", this.mu);
-      document.addEventListener("touchmove", this.tm);
-      document.addEventListener("touchend", this.mu);
     },
-    mu() {
-      this.isMove1 = false;
-      this.isMove2 = false;
-      document.removeEventListener("mousemove", this.mm);
-      document.removeEventListener("mouseup", this.mu);
-      document.removeEventListener("touchmove", this.tm);
-      document.removeEventListener("touchend", this.mu);
+    dtm(ev) {
+      // 押下中だったら
+      if (this.isDrag) {
+        console.log("tm-clientX:%d", ev.touches[0].clientX);
+        // 前回MouseDown時との差分を算出
+        var diff = ev.touches[0].clientX - this.xPrev;
+        console.log("tm-diff:%d", diff);
+        // 左右のLineに差分を適用
+        this.xLeft += diff;
+        this.xRight += diff;
+        // 前回MouseMove時のX座標の更新
+        this.xPrev = ev.touches[0].clientX;
+        console.log("tm-xPrev:%d", this.xPrev);
+      }
     },
-    mm(ev) {
-      this.xClient = ev.clientX;
-      if (this.isMove1) {
-        // todo: fix magic number
+    dmu() {
+      console.log("mu-xLeft:%d", this.xLeft);
+      var diffLeft =
+        Math.round((this.xLeft - this.xFirstLeft) / this.dayWidth) *
+        this.dayWidth;
+      console.log("mu-diffLeft:%d", diffLeft);
+      this.xLeft = this.xFirstLeft + diffLeft;
+      console.log("mu-xLeft:%d", this.xLeft);
+
+      console.log("mu-xRight:%d", this.xRight);
+      var diffRight =
+        Math.round((this.xRight - this.xFirstRight) / this.dayWidth) *
+        this.dayWidth;
+      console.log("mu-diffRight:%d", diffRight);
+      this.xRight = this.xFirstRight + diffRight;
+      console.log("mu-xRight:%d", this.xRight);
+
+      this.isDrag = false;
+      document.removeEventListener("mousemove", this.dmm);
+      document.removeEventListener("touchmove", this.dtm);
+      document.removeEventListener("mouseup", this.dmu);
+      document.removeEventListener("touchend", this.dmu);
+    },
+    rmd(ev, val) {
+      if (val === 1) {
+        this.isResize1 = true;
+        this.xFirst = this.xLeft;
+      } else if (val === 2) {
+        this.isResize2 = true;
+        this.xFirst = this.xRight;
+      }
+      console.log("md-xFirst:%d", this.xFirst);
+      document.addEventListener("mousemove", this.rmm);
+      document.addEventListener("touchmove", this.rtm);
+      document.addEventListener("mouseup", this.rmu);
+      document.addEventListener("touchend", this.rmu);
+    },
+    rmm(ev) {
+      if (this.isResize1) {
         this.xLeft = ev.clientX - 10;
-      } else if (this.isMove2) {
+      } else if (this.isResize2) {
         this.xRight = ev.clientX - 10;
       }
     },
-    tm(ev) {
-      if (this.isMove1) {
-        // todo: fix magic number
+    rtm(ev) {
+      if (this.isResize1) {
         this.xLeft = ev.touches[0].clientX - 10;
-      } else if (this.isMove2) {
+      } else if (this.isResize2) {
         this.xRight = ev.touches[0].clientX - 10;
       }
-    }
-  }
-});
-var app2 = new Vue({
-  el: "#app2",
-  data: function() {
-    return {
-      xLeft: 20,
-      xRight: 120,
-      // y: 25,
-      // width: 200,
-      isMove1: false,
-      isMove2: false,
-      xClient: 0
-    };
-  },
-  computed: {
-    rectWidth: function() {
-      return this.xLeft < this.xRight
-        ? this.xRight - this.xLeft
-        : this.xLeft - this.xRight;
     },
-    rectX() {
-      return this.xLeft < this.xRight ? this.xLeft : this.xRight;
-    }
-  },
-  methods: {
-    md(ev, val) {
-      if (val === 1) {
-        this.isMove1 = true;
-      } else if (val === 2) {
-        this.isMove2 = true;
+    rmu() {
+      console.log("mu-xFirst:%d", this.xFirst);
+      if (this.isResize1) {
+        console.log("mu-xLeft:%d", this.xLeft);
+        var diff =
+          Math.round((this.xLeft - this.xFirst) / this.dayWidth) *
+          this.dayWidth;
+        console.log("mu-diff:%d", diff);
+        this.xLeft = this.xFirst + diff;
+        console.log("mu-xLeft:%d", this.xLeft);
+      } else if (this.isResize2) {
+        console.log("mu-xRight:%d", this.xRight);
+        var diff =
+          Math.round((this.xRight - this.xFirst) / this.dayWidth) *
+          this.dayWidth;
+        console.log("mu-diff:%d", diff);
+        this.xRight = this.xFirst + diff;
+        console.log("mu-xRight:%d", this.xRight);
       }
-      document.addEventListener("mousemove", this.mm);
-      document.addEventListener("mouseup", this.mu);
-      document.addEventListener("touchmove", this.tm);
-      document.addEventListener("touchend", this.mu);
-    },
-    mu() {
-      this.isMove1 = false;
-      this.isMove2 = false;
-      document.removeEventListener("mousemove", this.mm);
-      document.removeEventListener("mouseup", this.mu);
-      document.removeEventListener("touchmove", this.tm);
-      document.removeEventListener("touchend", this.mu);
-    },
-    mm(ev) {
-      this.xClient = ev.clientX;
-      var xxx = ev.clientX;
-      if (this.isMove1) {
-        // todo: fix magic number
-        if (xxx > this.xLeft) {
-          // this.xLeft = ev.clientX - 10;
-          this.xLeft = xxx + 30;
-        }
-      } else if (this.isMove2) {
-        if (xxx > this.xRight) {
-          // this.xRight = ev.clientX - 10;
-          this.xRight = xxx + 30;
-        }
-      }
-    },
-    tm(ev) {
-      if (this.isMove1) {
-        // todo: fix magic number
-        this.xLeft = ev.touches[0].clientX - 10;
-      } else if (this.isMove2) {
-        this.xRight = ev.touches[0].clientX - 10;
-      }
-    }
-  }
-});
-var app3 = new Vue({
-	el : "#app3",
-	data : {
-    list_line : [
-      {	// ×のパーツ（そのいち）
-        x1 : 200,
-        y1 : 100,
-        x2 : 400,
-        y2 : 300,
-        stroke : "rgb(255,0,0)",
-        width : 50,
-      },
-      {	// ×のパーツ（そのに）
-        x1 : 400,
-        y1 : 100,
-        x2 : 200,
-        y2 : 300,
-        stroke : "rgb(255,0,0)",
-        width : 50,
-      },
-    ],
-    // 前回のクリック座標
-    prev_pos : {
-      x : 0,
-      y : 0,
-    },
-    // 押下中だったらtrue
-    is_mousedown : false,
-  },
-  methods : {
-  	//
-    touchstart : function(e){
-      this.is_mousedown = true;
-      console.log("touch start:%d,%d", e.offsetX, e.offsetY);
-      this.prev_pos.x = e.offsetX;
-      this.prev_pos.y = e.offsetY;
-    },
-    touchmove : function(e){
-    	// 押下中だったら
-      if(this.is_mousedown){
-      	// 前回座標との差分を算出
-        let moved_x = e.offsetX - this.prev_pos.x;
-        let moved_y = e.offsetY - this.prev_pos.y;
-
-        // 全要素に差分を適用
-        for(let line of this.list_line){
-          line.x1 += moved_x;
-          line.x2 += moved_x;
-          line.y1 += moved_y;
-          line.y2 += moved_y;
-        }
-
-        // 前回のクリック座標を更新
-        this.prev_pos.x = e.offsetX;
-        this.prev_pos.y = e.offsetY;
-      }
-    },
-    touchend : function(e){
-      this.is_mousedown = false;
-      console.log("touch end");
+      this.isResize1 = false;
+      this.isResize2 = false;
+      document.removeEventListener("mousemove", this.rmm);
+      document.removeEventListener("touchmove", this.rtm);
+      document.removeEventListener("mouseup", this.rmu);
+      document.removeEventListener("touchend", this.rmu);
     }
   }
 });

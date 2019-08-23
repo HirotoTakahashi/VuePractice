@@ -9,9 +9,12 @@
       .resizable {
         cursor: ew-resize;
       }
+      .draggable {
+        cursor: move;
+      }
       svg {
-        width: 640px;
-        height: 480px;
+        width: 700px;
+        height: 500px;
         background-color: silver;
       }
       line {
@@ -20,87 +23,40 @@
     </style>
   </head>
   <body>
-    <div id="app1" style="width: 100%; height: 50px;">
+    <div id="app" style="width: 100%; height: 50px;">
       <svg width="100%" height="100%">
         <rect width="100%" height="100%" />
-        <rect :x="rectX" y="0" :width="rectWidth" height="50" fill="#ddd" />
-        <g @mousedown="md($event, 1)" @touchstart="md($event, 1)">
-          <line
-            :x1="xLeft"
-            :x2="xLeft"
-            y1="0"
-            y2="50"
-            stroke="#ddd"
-            stroke-width="10"
-            class="resizable"
-          />
-          <!-- <circle :cx="xLeft" :cy="y" r="10" fill="#fff" /> -->
-        </g>
-        <g @mousedown="md($event, 2)" @touchstart="md($event, 2)">
-          <line
-            :x1="xRight"
-            :x2="xRight"
-            y1="0"
-            y2="50"
-            stroke="#ddd"
-            stroke-width="10"
-            class="resizable"
-          />
-          <!-- <circle :cx="xRight" :cy="y" r="10" fill="#fff" /> -->
-        </g>
-      </svg>
-      <div>
-        {{ isMove1 }}, {{ xLeft }}, {{ isMove2 }}, {{ xRight }}, {{ xClient }}
-      </div>
-    </div>
-    <div id="app2" style="width: 100%; height: 50px;">
-      <svg width="100%" height="100%">
-        <rect width="100%" height="100%" />
-        <rect :x="rectX" y="0" :width="rectWidth" height="50" fill="#ddd" />
-        <g @mousedown="md($event, 1)" @touchstart="md($event, 1)">
-          <line
-            :x1="xLeft"
-            :x2="xLeft"
-            y1="0"
-            y2="50"
-            stroke="#ddd"
-            stroke-width="10"
-            class="resizable"
-          />
-          <!-- <circle :cx="xLeft" :cy="y" r="10" fill="#fff" /> -->
-        </g>
-        <g @mousedown="md($event, 2)" @touchstart="md($event, 2)">
-          <line
-            :x1="xRight"
-            :x2="xRight"
-            y1="0"
-            y2="50"
-            stroke="#ddd"
-            stroke-width="10"
-            class="resizable"
-          />
-          <!-- <circle :cx="xRight" :cy="y" r="10" fill="#fff" /> -->
-        </g>
-      </svg>
-      <div>
-        {{ isMove1 }}, {{ xLeft }}, {{ isMove2 }}, {{ xRight }}, {{ xClient }}
-      </div>
-    </div>
-    <div id="app3" style="height:500px">
-      <svg
-        @mousemove="touchmove($event)"
-        @mouseup="touchend($event)"
-        @mouseleave="touchend($event)"
-      >
+        <rect
+          @mousedown="dmd($event)"
+          @touchstart="dmd($event)"
+          :x="rectX"
+          y="0"
+          :width="rectWidth"
+          height="50"
+          fill="#ddd"
+          class="draggable"
+        />
         <line
-          v-for="line in list_line"
-          @mousedown="touchstart($event)"
-          :x1="line.x1"
-          :y1="line.y1"
-          :x2="line.x2"
-          :y2="line.y2"
-          :stroke-width="line.width"
-          :stroke="line.stroke"
+          @mousedown="rmd($event, 1)"
+          @touchstart="rmd($event, 1)"
+          :x1="xLeft"
+          :x2="xLeft"
+          y1="0"
+          y2="50"
+          stroke="#ddd"
+          stroke-width="10"
+          class="resizable"
+        />
+        <line
+          @mousedown="rmd($event, 2)"
+          @touchstart="rmd($event, 2)"
+          :x1="xRight"
+          :x2="xRight"
+          y1="0"
+          y2="50"
+          stroke="#ddd"
+          stroke-width="10"
+          class="resizable"
         />
       </svg>
     </div>
